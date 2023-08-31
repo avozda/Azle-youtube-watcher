@@ -1,0 +1,120 @@
+type Account = record { owner : principal; subaccount : opt vec nat8 };
+type InitArgs = record {
+  fee : nat;
+  decimals : nat8;
+  metadata : vec record { text; Value };
+  minting_account : opt Account;
+  name : text;
+  transaction_window_nanos : opt nat64;
+  permitted_drift_nanos : opt nat64;
+  supported_standards : vec SupportedStandard;
+  symbol : text;
+  initial_account_balances : vec InitialAccountBalance;
+};
+type InitialAccountBalance = record { balance : nat; account : Account };
+type ManualReply = variant { Ok : Proposal; Err : text };
+type Proposal = record {
+  id : nat;
+  votes_no : Tokens;
+  voters : vec principal;
+  state : ProposalState;
+  timestamp : nat64;
+  proposer : principal;
+  votes_yes : Tokens;
+  payload : ProposalPayload;
+};
+type ProposalPayload = record {
+  title : text;
+  duration : nat;
+  channelTile : text;
+  thumbnailUrl : text;
+  videoId : text;
+};
+type ProposalState = variant {
+  Failed : text;
+  Open;
+  Executing;
+  Rejected;
+  Succeeded;
+  Accepted;
+};
+type SupportedStandard = record { url : text; name : text };
+type Tokens = record { amount_e8s : nat };
+type Transaction = record {
+  fee : nat;
+  args : opt TransferArgs;
+  from : opt Account;
+  kind : TransactionKind;
+  timestamp : nat64;
+};
+type TransactionKind = variant { Burn; Mint; Transfer };
+type TransferArgs = record {
+  to : Account;
+  fee : opt nat;
+  memo : opt vec nat8;
+  from_subaccount : opt vec nat8;
+  created_at_time : opt nat64;
+  amount : nat;
+};
+type TransferError = variant {
+  GenericError : _InlineTransferErrorGenericError;
+  TemporarilyUnavailable;
+  BadBurn : _InlineTransferErrorBadBurn;
+  Duplicate : _InlineTransferErrorDuplicate;
+  BadFee : _InlineTransferErrorBadFee;
+  CreatedInFuture : _InlineTransferErrorCreatedInFuture;
+  TooOld;
+  InsufficientFunds : _InlineTransferErrorInsufficientFunds;
+};
+type TransferResult = variant { Ok : nat; Err : TransferError };
+type User = record {
+  id : principal;
+  nftURL : text;
+  about : text;
+  username : text;
+  twitterLink : text;
+  createdAt : nat64;
+};
+type UserPayload = record {
+  nftURL : text;
+  about : text;
+  username : text;
+  twitterLink : text;
+};
+type Value = variant { Int : int; Nat : nat; Blob : vec nat8; Text : text };
+type Vote = variant { No; Yes };
+type VoteArgs = record { vote : Vote; proposal_id : nat };
+type _AzleResult = variant { Ok : User; Err : text };
+type _AzleResult_1 = variant { Ok : Proposal; Err : text };
+type _InlineTransferErrorBadBurn = record { min_burn_amount : nat };
+type _InlineTransferErrorBadFee = record { expected_fee : nat };
+type _InlineTransferErrorCreatedInFuture = record { ledger_time : nat64 };
+type _InlineTransferErrorDuplicate = record { duplicate_of : nat };
+type _InlineTransferErrorGenericError = record {
+  message : text;
+  error_code : nat;
+};
+type _InlineTransferErrorInsufficientFunds = record { balance : nat };
+service : (InitArgs) -> {
+  addProposal : (text) -> (ManualReply);
+  deleteUser : () -> (_AzleResult);
+  execute_accepted_proposals : () -> ();
+  getProposals : () -> (vec Proposal) query;
+  getUser : (principal) -> (_AzleResult) query;
+  get_transactions : (opt nat64, opt nat64) -> (vec Transaction) query;
+  get_video_details : (text) -> (ProposalPayload);
+  icrc1_balance_of : (Account) -> (nat) query;
+  icrc1_decimals : () -> (nat8) query;
+  icrc1_fee : () -> (nat) query;
+  icrc1_metadata : () -> (vec record { text; Value }) query;
+  icrc1_minting_account : () -> (opt Account) query;
+  icrc1_name : () -> (text) query;
+  icrc1_supported_standards : () -> (vec SupportedStandard) query;
+  icrc1_symbol : () -> (text) query;
+  icrc1_total_supply : () -> (nat) query;
+  icrc1_transfer : (TransferArgs) -> (TransferResult);
+  loginUser : () -> (_AzleResult);
+  registerUser : (UserPayload) -> (_AzleResult);
+  updateUser : (UserPayload) -> (_AzleResult);
+  vote : (VoteArgs) -> (_AzleResult_1);
+}

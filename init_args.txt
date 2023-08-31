@@ -1,0 +1,27 @@
+record {
+    decimals = 8 : nat8;
+    fee = 0 : nat;
+    initial_account_balances = vec {
+        record {
+            account = record {
+                owner = principal "ogtn2-u6mfe-z7mit-j3fjj-h5y6f-beq4x-dtvgo-cclzu-4t4n6-cbo2t-uae";
+                subaccount = opt vec { 0 : nat8; 0 : nat8; 0 : nat8; 0 : nat8 };
+            };
+            balance = 300_000_000 : nat;
+        };
+        record {
+            account = record {
+                owner = principal "kdevg-lc5jc-fhsh6-coqai-igrrm-jdlbc-yames-ngmaq-ago64-67mxm-lae";
+                subaccount = opt vec { 0 : nat8; 0 : nat8; 0 : nat8; 1 : nat8 };
+            };
+            balance = 400_000_000 : nat;
+        };
+    };
+    metadata = vec {};
+    minting_account = opt record {
+        owner = principal "ogtn2-u6mfe-z7mit-j3fjj-h5y6f-beq4x-dtvgo-cclzu-4t4n6-cbo2t-uae";
+    };
+    name = "Azle Bootcamp Token";
+    supported_standards = vec {};
+    symbol = "ABCT";
+}
