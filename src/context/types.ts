@@ -1,5 +1,6 @@
 import { Principal } from '@dfinity/principal';
-import { Proposal } from '../declarations/backend/backend.did';
+import { Proposal, currentVideo, watchListVideo } from '../declarations/backend/backend.did';
+
 export const SET_LOADING = 'SET_LOADING';
 export const SET_PROFILE_LOADING = 'SET_PROFILE_LOADING';
 export const SET_TOKEN_LOADING = 'SET_TOKEN_LOADING';
@@ -21,6 +22,11 @@ export const PROPOSAL_ERR = 'PROPOSAL_ERR';
 export const UPDATE_PROPOSAL = 'UPDATE_PROPOSAL';
 
 
+export const GET_WATCHLIST = 'GET_WATCHLIST';
+export const GET_VIDEO = 'GET_VIDEO';
+export const VIDEO_ERROR = 'VIDEO_ERROR';
+export const VIDEO_LOADING = 'VIDEO_LOADING';
+
 
 export interface IUserState {
     user: {};
@@ -38,6 +44,14 @@ export interface IProposalState {
     loading: boolean;
     error: null | string;
     proposals: Proposal[]
+}
+
+export interface IVideoState {
+    loading: boolean;
+    error: null | string;
+    currentVideo: currentVideo | null;
+    watchList: watchListVideo[]
+
 }
 
 

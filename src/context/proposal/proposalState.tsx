@@ -15,6 +15,7 @@ import { AuthClient } from '@dfinity/auth-client';
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { idlFactory } from '../../declarations/backend';
 import { VoteArgs } from '../../declarations/backend/backend.did';
+import { Principal } from '@dfinity/principal';
 
 type Props = {
     children: ReactNode
@@ -35,7 +36,6 @@ const UserState = (props: Props) => {
     const getProposals = async () => {
         try {
             const proposals = await backend.getProposals();
-            console.log(proposals);
             dispatch({
                 type: GET_PROPOSALS,
                 payload: proposals
@@ -73,7 +73,6 @@ const UserState = (props: Props) => {
                 })
                 return
             }
-            console.log(res.Ok)
             dispatch({
                 type: UPDATE_PROPOSAL,
                 payload: res.Ok
@@ -118,7 +117,6 @@ const UserState = (props: Props) => {
                 return;
             }
             if (proposal.Ok) {
-                console.log(proposal.Ok)
                 toast({
                     title: "Proposal posted successfully",
                     status: 'success',

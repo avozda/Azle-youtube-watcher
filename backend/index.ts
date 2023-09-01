@@ -8,7 +8,8 @@ import {
   Opt,
   Vec,
   Principal,
-  $heartbeat
+  $heartbeat,
+  nat
 } from "azle";
 export {
   get_transactions,
@@ -25,7 +26,7 @@ export {
 } from './api';
 import { state } from "./state";
 export { init } from './init';
-import { Proposal, ProposalId, ProposalPayload, VoteArgs, User, UserPayload } from "./types";
+import { Proposal, ProposalId, ProposalPayload, VoteArgs, User, UserPayload, watchListVideo, currentVideo } from "./types";
 import { handle_mint } from "./transfer/mint";
 import { balance_of, set_account_balance } from "./account";
 import { get_video_details } from "./ytbvideo";
@@ -35,7 +36,8 @@ export { get_video_details } from "./ytbvideo"
 
 const userStorage = new StableBTreeMap<Principal, User>(0, 63, 1024);
 const proposals = new StableBTreeMap<ProposalId, Proposal>(1, 100, 2_000);
-let currentVideo: null | string = null;
+const watchList = new StableBTreeMap<Principal, watchListVideo>(2, 100, 2_000);
+let currentWatchTime: nat = 0n;
 /**
  * returns A registered User or an error message
  */
@@ -144,6 +146,10 @@ $query;
 export function getProposals(): Vec<Proposal> {
   return proposals.values();
 }
+$query;
+export function getWatchList(): Vec<ProposalPayload> {
+  return watchList.values();
+}
 
 $update
 export function vote(args: VoteArgs): Result<Proposal, string> {
@@ -161,7 +167,7 @@ export function vote(args: VoteArgs): Result<Proposal, string> {
     return Result.Err<Proposal, string>("You have no voting power")
   }
 
-  if (proposal.voters.includes(ic.caller())) {
+  if (proposal.voters.some(e => e.toString() === ic.caller().toString())) {
     return Result.Err<Proposal, string>("You have already voted")
   }
 
@@ -173,13 +179,13 @@ export function vote(args: VoteArgs): Result<Proposal, string> {
   }
   proposal.voters.push(ic.caller())
 
-  if (proposal.votes_yes.amount_e8s > state.proposal_vote_threshold.amount_e8s) {
+  if (proposal.votes_yes.amount_e8s >= state.proposal_vote_threshold.amount_e8s) {
     set_account_balance(
       { owner: proposal.proposer, subaccount: Opt.None },
       (balance_of({ owner: proposal.proposer, subaccount: Opt.None }) + state.proposal_submission_deposit.amount_e8s))
     proposal.state = { Accepted: null };
   }
-  if (proposal.votes_no.amount_e8s > state.proposal_vote_threshold.amount_e8s) {
+  if (proposal.votes_no.amount_e8s >= state.proposal_vote_threshold.amount_e8s) {
     proposal.state = { Rejected: null };
   }
 
@@ -205,7 +211,7 @@ function deduct_proposal_submission_deposit(caller: Principal): Result<null, str
 
 $update
 export function execute_accepted_proposals(): void {
-  const accepted_proposlas = proposals.values().filter((proposal) => proposal.state.Accepted == null)
+  const accepted_proposlas = proposals.values().filter((proposal) => proposal.state.Accepted !== undefined)
 
   accepted_proposlas.forEach(proposal => {
     execute_proposal(proposal)
@@ -214,10 +220,47 @@ export function execute_accepted_proposals(): void {
 
 
 function execute_proposal(proposal: Proposal): void {
-
+  proposal.state = { Succeeded: null }
+  proposals.insert(proposal.id, proposal);
+  const id = generateId();
+  const data: watchListVideo = {
+    ...proposal.payload,
+    id
+  }
+  watchList.insert(id, data)
 }
 
 $heartbeat
 export function heartbeat(): void {
+  if (watchList.len() > 0) {
+    if (currentWatchTime < watchList.values()[0].duration) {
+      currentWatchTime += 1n;
+    } else {
+      if (watchList.len() > 1) {
+        watchList.remove(watchList.values()[0].id)
+        currentWatchTime = 0n;
+      } else {
+        currentWatchTime = 0n;
+      }
+    }
+  } else {
+    currentWatchTime = 0n;
+  }
   execute_accepted_proposals()
+}
+
+$query
+export function getCurrentVideo(): Result<currentVideo, string> {
+  if (watchList.len() < 1) {
+    return Result.Err("No videos in watchlist")
+  }
+  return Result.Ok({ video: watchList.values()[0], time: currentWatchTime })
+}
+
+function generateId(): Principal {
+  const randomBytes = new Array(29)
+    .fill(0)
+    .map((_) => Math.floor(Math.random() * 256));
+
+  return Principal.fromUint8Array(Uint8Array.from(randomBytes));
 }

@@ -1,5 +1,5 @@
-import React, { useContext } from 'react'
-import { Card, Box, Image, HStack, Stack, Heading, Text, CardBody, CardFooter, Button } from '@chakra-ui/react'
+import React, { useContext, useEffect } from 'react'
+import { Card, Box, Image, HStack, Stack, Heading, Text, CardBody, CardFooter, Button, Badge } from '@chakra-ui/react'
 import { Proposal } from '../declarations/backend/backend.did'
 import UserContext from '../context/user/userContext'
 import ProposalContext from '../context/proposal/proposalContext'
@@ -41,9 +41,9 @@ const ProposalCard = (props: Props) => {
                     </HStack>
                     <HStack justifyContent={"space-between"}>
                         <Text py='2'>
-                            State - {Object.keys(props.proposal.state).includes("Open") && "Open"}
-                            {Object.keys(props.proposal.state).includes("Succeeded") && "Accepted"}
-                            {Object.keys(props.proposal.state).includes("Rejected") && "Rejected"}
+                            {Object.keys(props.proposal.state).includes("Open") && <Badge colorScheme='blue'>Open</Badge>}
+                            {(Object.keys(props.proposal.state).includes("Succeeded") || Object.keys(props.proposal.state).includes("Accepted")) && <Badge colorScheme='green'>Accepted</Badge>}
+                            {Object.keys(props.proposal.state).includes("Rejected") && <Badge colorScheme='red'>Rejected</Badge>}
 
 
                         </Text>
@@ -52,13 +52,12 @@ const ProposalCard = (props: Props) => {
                                 <Text>Add to watchlist?</Text>
                                 <Button isDisabled={loading} onClick={() => vote({ proposal_id: props.proposal.id, vote: { Yes: null } }, actor)} mr={5} variant='solid' colorScheme='green'>
                                     Yes {
-                                        (props.proposal.votes_yes.amount_e8s + props.proposal.votes_no.amount_e8s) > 0 && (props.proposal.votes_yes.amount_e8s
-                                            / (props.proposal.votes_yes.amount_e8s + props.proposal.votes_no.amount_e8s) * 100n).toString() + "%"}
+                                        (props.proposal.votes_yes.amount_e8s + props.proposal.votes_no.amount_e8s) > 0 && Math.floor(Number(props.proposal.votes_yes.amount_e8s) / (Number(props.proposal.votes_no.amount_e8s) + Number(props.proposal.votes_yes.amount_e8s)) * 100).toString() + "%"}
                                 </Button>
                                 <Button isDisabled={loading} onClick={() => vote({ proposal_id: props.proposal.id, vote: { No: null } }, actor)} variant='solid' colorScheme='red'>
                                     No  {
-                                        (props.proposal.votes_no.amount_e8s + props.proposal.votes_no.amount_e8s) > 0 && (props.proposal.votes_yes.amount_e8s
-                                            / (props.proposal.votes_yes.amount_e8s + props.proposal.votes_no.amount_e8s) * 100n).toString() + "%"}
+                                        (props.proposal.votes_no.amount_e8s + props.proposal.votes_no.amount_e8s) > 0 && Math.floor(Number(props.proposal.votes_no.amount_e8s) / (Number(props.proposal.votes_no.amount_e8s) + Number(props.proposal.votes_yes.amount_e8s)) * 100).toString() + "%"}
+
                                 </Button>
                             </Box>
                         }

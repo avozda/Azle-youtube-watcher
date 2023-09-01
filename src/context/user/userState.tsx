@@ -99,13 +99,11 @@ const UserState = (props: Props) => {
     dispatch({ type: SET_LOADING });
     try {
       const profile: any = await actor.loginUser();
-      console.log(profile)
       if (profile.Ok) {
         dispatch({
           type: USER_LOADED,
           payload: { ...profile.Ok, hasProfile: true },
         });
-        console.log(profile.Ok.id.toString())
       } else {
         dispatch({
           type: USER_LOADED,
@@ -183,12 +181,19 @@ const UserState = (props: Props) => {
           position: 'bottom-right',
           isClosable: true,
         });
-      } else {
-        console.log(profile)
       }
 
     } catch (error) {
-      console.log(error)
+      toast({
+        title: "Someting went wrong",
+        status: 'error',
+        duration: 5000,
+        position: 'bottom-right',
+        isClosable: true,
+      });
+      dispatch({
+        type: AUTH_ERROR,
+      });
     }
   };
   const updateProfile = async (formData: User) => {
@@ -217,7 +222,16 @@ const UserState = (props: Props) => {
       }
 
     } catch (error) {
-      console.log(error)
+      toast({
+        title: "Someting went wrong",
+        status: 'error',
+        duration: 5000,
+        position: 'bottom-right',
+        isClosable: true,
+      });
+      dispatch({
+        type: AUTH_ERROR,
+      });
     }
   };
 
@@ -240,7 +254,6 @@ const UserState = (props: Props) => {
       },
       maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
       onSuccess: async () => {
-        console.log("succ")
         toast({
           title: "You are now logged in",
           status: 'success',

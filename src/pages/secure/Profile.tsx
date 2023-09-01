@@ -59,7 +59,7 @@ export default function UserProfileEdit() {
                         if (!values.about) { values.about = "" }
                         if (!values.twitterLink) { values.twitterLink = "" }
                         if (!values.nftURL) { values.nftURL = "" }
-                        console.log(hasProfile)
+
                         hasProfile ? updateProfile(values) : registerProfile(values)
                     }}
                 >

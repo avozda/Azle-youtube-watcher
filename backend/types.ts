@@ -134,6 +134,19 @@ export type ProposalPayload = Record<{
     thumbnailUrl: string;
 }>;
 
+export type currentVideo = Record<{
+    video: watchListVideo;
+    time: nat
+}>;
+export type watchListVideo = Record<{
+    id: Principal;
+    videoId: string;
+    title: string;
+    duration: nat;
+    channelTile: string;
+    thumbnailUrl: string;
+}>;
+
 export type Proposal = Record<{
     id: nat;
     timestamp: nat64;

@@ -36,7 +36,7 @@ const Proposals = () => {
         <TabPanel>
           <Box>
             {proposals.map((data: Proposal) => {
-              if (Object.keys(data.state).includes("Succeeded")) {
+              if (Object.keys(data.state).includes("Succeeded") || Object.keys(data.state).includes("Accepted")) {
                 return <ProposalCard key={data.id.toString()} proposal={data} />
               }
             }

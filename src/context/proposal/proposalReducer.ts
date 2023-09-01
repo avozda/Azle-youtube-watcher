@@ -18,14 +18,6 @@ const Reducer = (state: any, action: any) => {
                 proposals: action.payload
             }
         case CREATE_PROPOSAL:
-
-            console.log({
-                ...state,
-                loading: false,
-                error: null,
-                proposals: [...state.proposals, action.payload]
-            })
-
             return {
                 ...state,
                 loading: false,
